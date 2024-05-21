@@ -39,5 +39,16 @@ func (ad *adminUsecase) LoginHandler(adminDetails models.AdminLogin) (domain.Adm
 	if err != nil {
 		return domain.AdminToken{}, err
 	}
+	access, refresh, err := ad.helper.GenerateTokenAdmin(adminDetailResponse)
+
+	if err != nil {
+		return domain.AdminToken{}, err
+	}
+
+	return domain.AdminToken{
+		Admin:   adminDetailResponse,
+		Token:   access,
+		Refresh: refresh,
+	}, nil
 
 }
