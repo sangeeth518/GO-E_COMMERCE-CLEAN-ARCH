@@ -6,6 +6,7 @@ import (
 
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/db"
+	"github.com/sangeeth518/go-Ecommerce/pkg/di"
 )
 
 func main() {
@@ -21,4 +22,13 @@ func main() {
 	fmt.Println(db)
 
 	fmt.Printf(config.DBHost)
+
+	server, dierr := di.InitializeAPI(config)
+
+	if err != nil {
+		log.Fatal("cannot start server", dierr)
+	} else {
+		server.Start()
+	}
+
 }

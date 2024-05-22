@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
+	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
 	"github.com/twilio/twilio-go"
 )
@@ -13,7 +14,7 @@ type helper struct {
 	config config.Config
 }
 
-func NewHelper(config config.Config) *helper {
+func NewHelper(config config.Config) interfaces.Helper {
 	return &helper{
 		config: config,
 	}
