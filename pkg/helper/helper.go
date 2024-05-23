@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -8,6 +9,7 @@ import (
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
 	"github.com/twilio/twilio-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type helper struct {
@@ -60,5 +62,33 @@ func (h *helper) GenerateTokenAdmin(admin models.AdminDetailResponse) (string, s
 		return "", "", err
 	}
 	return accessTokenstring, refreshTokenstrig, nil
+
+}
+
+func (h *helper) GenerateTokenClient(user models.UserDetailsResponse) (string, error) {
+	Claims := &AuthCustomClaims{
+		ID:    user.Id,
+		Email: user.Email,
+		Role:  "user",
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims)
+	tokenstrig, err := token.SignedString([]byte("usersecret"))
+	if err != nil {
+		return "", err
+	}
+	return tokenstrig, nil
+}
+
+func (h *helper) PasswordHashing(password string) (string, error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return "", errors.New("password hashing error")
+	}
+	hash := string(hashed)
+	return hash, nil
 
 }

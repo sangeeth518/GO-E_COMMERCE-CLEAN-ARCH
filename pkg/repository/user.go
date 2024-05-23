@@ -17,6 +17,12 @@ func NewUserRepository(DB *gorm.DB) interfaces.UserRepo {
 }
 
 func (ur *userRepository) CheckUserAvailability(email string) bool {
+	var count int
+	if err := ur.DB.Exec("select count(*) from users where email =?", email).Scan(count).Error; err != nil {
+		return false
+	}
+	//if count is greater than 0 that means user with same email id already exist and it returns true
+	return count > 0
 
 }
 

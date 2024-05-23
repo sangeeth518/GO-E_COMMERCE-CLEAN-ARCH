@@ -12,7 +12,7 @@ type ServerHttp struct {
 	engine *gin.Engine
 }
 
-func NewServerHttp(adminHandler *handler.AdminHandler) *ServerHttp {
+func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.UserHandler) *ServerHttp {
 
 	// gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
@@ -20,6 +20,7 @@ func NewServerHttp(adminHandler *handler.AdminHandler) *ServerHttp {
 	engine.Use(gin.Logger())
 
 	routes.AdminRoutes(engine.Group("/admin"), adminHandler)
+	routes.UserRoutes(engine.Group("/user"), userhandler)
 	return &ServerHttp{
 		engine: engine,
 	}
