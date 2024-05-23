@@ -13,6 +13,8 @@ type ServerHttp struct {
 }
 
 func NewServerHttp(adminHandler *handler.AdminHandler) *ServerHttp {
+
+	// gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 
 	engine.Use(gin.Logger())
