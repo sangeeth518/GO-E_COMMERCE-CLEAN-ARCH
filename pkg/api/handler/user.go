@@ -25,18 +25,21 @@ func (u *UserHandler) UserSignup(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
+		return
 	}
 
 	err := validator.New().Struct(user)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "constraints not in correct format", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
+		return
 	}
 
 	usercreated, err := u.userUsecase.UserSignup(user)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "user could't signup", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
+		return
 	}
 
 	successRes := response.ClientResponse(http.StatusCreated, "User succesfully signedup", usercreated, nil)

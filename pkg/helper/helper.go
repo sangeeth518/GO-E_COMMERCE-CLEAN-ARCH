@@ -92,3 +92,11 @@ func (h *helper) PasswordHashing(password string) (string, error) {
 	return hash, nil
 
 }
+
+func (h *helper) CompareHashPassword(password string, givenpass string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(password), []byte(givenpass))
+	if err != nil {
+		return err
+	}
+	return nil
+}

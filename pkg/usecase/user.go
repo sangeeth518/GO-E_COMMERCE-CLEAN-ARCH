@@ -53,3 +53,10 @@ func (use *userUsecase) UserSignup(user models.UserDetails) (models.UserToken, e
 	}, nil
 
 }
+
+func (use *userUsecase) UserLogin(user models.UserLogin) (models.UserToken, error) {
+	ok := use.userrepo.CheckUserAvailability(user.Email)
+	if !ok {
+		return models.UserToken{}, errors.New("User didn't exist")
+	}
+}

@@ -19,3 +19,8 @@ type UserToken struct {
 	User  UserDetailsResponse
 	Token string
 }
+
+type UserLogin struct {
+	Email    string `json:"email" validate:"email"`
+	Password string `json:"password"`
+}

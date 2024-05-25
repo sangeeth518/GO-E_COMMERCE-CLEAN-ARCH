@@ -6,7 +6,7 @@ package di
 import (
 	"github.com/google/wire"
 	http "github.com/sangeeth518/go-Ecommerce/pkg/api"
-	"github.com/sangeeth518/go-Ecommerce/pkg/api/handler"
+	handler "github.com/sangeeth518/go-Ecommerce/pkg/api/handler"
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/db"
 	"github.com/sangeeth518/go-Ecommerce/pkg/helper"
@@ -15,7 +15,10 @@ import (
 )
 
 func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
-	wire.Build(db.ConnectDB, helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler, http.NewServerHttp)
+	wire.Build(db.ConnectDB, helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler,
+		repository.NewUserRepository, usecase.NewUserUsecase, handler.NewUserHandler,
+
+		http.NewServerHttp)
 
 	return &http.ServerHttp{}, nil
 }
