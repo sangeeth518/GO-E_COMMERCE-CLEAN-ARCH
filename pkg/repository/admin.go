@@ -23,3 +23,7 @@ func (ad *Adminrepo) LoginHandler(admindetails models.AdminLogin) (domain.Admin,
 	}
 	return admincomparedetails, nil
 }
+
+func (ad *Adminrepo) BlockUser(id int) bool {
+	return true
+}

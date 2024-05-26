@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
 	"gorm.io/gorm"
@@ -23,6 +25,24 @@ func (ur *userRepository) CheckUserAvailability(email string) bool {
 	}
 	//if count is greater than 0 that means user with same email id already exist and it returns true
 	return count > 0
+
+}
+
+func (ur *userRepository) UserBlockStatus(emil string) (bool, error) {
+	var permission bool
+	err := ur.DB.Raw("SELECT blocked FROM users WHERE email = $1", emil).Scan(&permission).Error
+	if err != nil {
+		return false, err
+	}
+	return permission, nil
+}
+
+func (ur *userRepository) FindUserByEmail(user models.UserLogin) (models.UserSigninResponse, error) {
+	var userResponse models.UserSigninResponse
+	if err := ur.DB.Raw("SELECT * FROM users WHERE email =$1 and blocked = false", user.Email).Scan(&userResponse).Error; err != nil {
+		return models.UserSigninResponse{}, errors.New("error checking user details")
+	}
+	return userResponse, nil
 
 }
 
