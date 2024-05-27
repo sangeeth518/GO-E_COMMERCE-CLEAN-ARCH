@@ -7,4 +7,6 @@ import (
 
 func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler) {
 	engine.POST("/adminlogin", adminHandler.LoginHandler)
+	engine.GET("/blockuser/:id", adminHandler.BlockUser)
+	engine.GET("/unblock/:id", adminHandler.UnblockUser)
 }

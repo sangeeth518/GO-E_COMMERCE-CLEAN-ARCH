@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/jinzhu/copier"
 	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
 	helper_interface "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
@@ -51,4 +53,41 @@ func (ad *adminUsecase) LoginHandler(adminDetails models.AdminLogin) (domain.Adm
 		Refresh: refresh,
 	}, nil
 
+}
+
+func (au *adminUsecase) BlockUser(id string) error {
+	userdetails, err := au.adminrepository.GetUserById(id)
+	if err != nil {
+		return err
+	}
+	if userdetails.Blocked {
+		return errors.New("already blocked")
+	} else {
+		userdetails.Blocked = true
+	}
+
+	err = au.adminrepository.BlockUserById(userdetails)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (au *adminUsecase) UnblockUser(id string) error {
+	user, err := au.adminrepository.GetUserById(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Blocked {
+		user.Blocked = false
+	} else {
+		return errors.New("user already unblocked")
+	}
+
+	err = au.adminrepository.BlockUserById(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

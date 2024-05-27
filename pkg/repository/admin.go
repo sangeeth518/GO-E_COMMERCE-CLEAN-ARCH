@@ -1,6 +1,10 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
+
 	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
@@ -24,6 +28,34 @@ func (ad *Adminrepo) LoginHandler(admindetails models.AdminLogin) (domain.Admin,
 	return admincomparedetails, nil
 }
 
-func (ad *Adminrepo) BlockUser(id int) bool {
-	return true
+func (ad *Adminrepo) GetUserById(id string) (domain.User, error) {
+	user_id, err := strconv.Atoi(id)
+	if err != nil {
+		return domain.User{}, err
+	}
+	var count int
+	if err := ad.DB.Raw("select count(*) from users where id =?", user_id).Scan(&count).Error; err != nil {
+		return domain.User{}, err
+	}
+	if count < 1 {
+		return domain.User{}, errors.New("user for the given id dosen't exist")
+	}
+	query := fmt.Sprintf("select * from users where id = %d", user_id)
+	var userdetails domain.User
+	if err := ad.DB.Raw(query).Scan(&userdetails).Error; err != nil {
+		return domain.User{}, err
+	}
+	return userdetails, nil
+
+}
+
+//Func which will both block and unblock user
+
+func (ad *Adminrepo) BlockUserById(user domain.User) error {
+	err := ad.DB.Exec("update users set blocked =? where id =?", user.Blocked, user.Id).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

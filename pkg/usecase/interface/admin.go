@@ -7,4 +7,6 @@ import (
 
 type AdminUseCase interface {
 	LoginHandler(adminDetails models.AdminLogin) (domain.AdminToken, error)
+	BlockUser(id string) error
+	UnblockUser(id string) error
 }
