@@ -4,9 +4,7 @@ go 1.22.1
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/google/wire v0.6.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/spf13/viper v1.18.2
 	github.com/twilio/twilio-go v1.20.1
@@ -25,8 +23,10 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.20.0
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/mock v1.6.0 // indirect
+	github.com/google/wire v0.6.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
