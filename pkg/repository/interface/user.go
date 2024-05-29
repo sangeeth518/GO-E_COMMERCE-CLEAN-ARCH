@@ -7,4 +7,6 @@ type UserRepo interface {
 	CheckUserAvailability(email string) bool
 	UserBlockStatus(emil string) (bool, error)
 	FindUserByEmail(user models.UserLogin) (models.UserSigninResponse, error)
+	Changepassword(id int, passowrd string) error
+	GetPassword(id int) (string, error)
 }

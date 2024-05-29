@@ -34,3 +34,9 @@ type UserSigninResponse struct {
 	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
+
+type Changepassword struct {
+	OldPassword        string `json:"old_password"`
+	NewPassword        string `json:"new_password"`
+	ConfirmNewPassword string `json:"confirm_newpassword"`
+}

@@ -54,3 +54,22 @@ func (ur *userRepository) UserSignup(user models.UserDetails) (models.UserDetail
 	return userdetails, nil
 
 }
+
+func (ur *userRepository) Changepassword(id int, passowrd string) error {
+	err := ur.DB.Exec("update users set password = ? where id = ?", id, passowrd).Error
+	if err != nil {
+
+		return err
+	}
+	return nil
+
+}
+
+func (u *userRepository) GetPassword(id int) (string, error) {
+	var userpassword string
+	err := u.DB.Raw("select password from users where id = ?", id).Scan(&userpassword).Error
+	if err != nil {
+		return "", err
+	}
+	return userpassword, nil
+}

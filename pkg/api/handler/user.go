@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -63,6 +64,30 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		return
 	}
 	successRes := response.ClientResponse(http.StatusOK, "Succesfully logged in", user_details, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
+
+func (uh *UserHandler) ChangePassword(c *gin.Context) {
+	idstring := c.Query("id")
+	id, err := strconv.Atoi(idstring)
+	if err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	var changepass models.Changepassword
+	if err := c.BindJSON(&changepass); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	if err := uh.userUsecase.ChangePassword(id, changepass.OldPassword, changepass.NewPassword, changepass.ConfirmNewPassword); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "Could not change the password", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "password changed Successfully ", nil, nil)
 	c.JSON(http.StatusOK, successRes)
 
 }

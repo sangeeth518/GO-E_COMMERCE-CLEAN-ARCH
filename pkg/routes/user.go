@@ -8,5 +8,6 @@ import (
 func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler) {
 	engine.POST("/signup", userhandler.UserSignup)
 	engine.POST("/login", userhandler.Login)
+	engine.PATCH("/changepass", userhandler.ChangePassword)
 
 }

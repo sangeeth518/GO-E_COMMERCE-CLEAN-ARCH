@@ -80,10 +80,6 @@ func (use *userUsecase) UserLogin(user models.UserLogin) (models.UserToken, erro
 	if err != nil {
 		return models.UserToken{}, errors.New("password Incorrect")
 	}
-	// err = bcrypt.CompareHashAndPassword([]byte(user_details.Password), []byte(user.Password))
-	// if err != nil {
-	// 	return models.UserToken{}, errors.New("password Incorrect")
-	// }
 	var userresponse models.UserDetailsResponse
 	userresponse.Id = int(user_details.Id)
 	userresponse.Name = user_details.Name
@@ -99,4 +95,26 @@ func (use *userUsecase) UserLogin(user models.UserLogin) (models.UserToken, erro
 		User:  userresponse,
 		Token: tokenstring,
 	}, nil
+}
+
+func (uc *userUsecase) ChangePassword(id int, password string, newpass string, confrmpass string) error {
+	user_password, err := uc.userrepo.GetPassword(id)
+	if err != nil {
+		return errors.New("internal error")
+	}
+
+	err = uc.helper.CompareHashPassword(user_password, password)
+	if err != nil {
+		return errors.New("password incorrect")
+	}
+	if newpass != confrmpass {
+		return errors.New("passwords does not match")
+	}
+
+	new_pass, err := uc.helper.PasswordHashing(password)
+	if err != nil {
+		return errors.New("error in password hashing")
+	}
+	return uc.userrepo.Changepassword(id, string(new_pass))
+
 }
