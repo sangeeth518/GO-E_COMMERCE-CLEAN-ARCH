@@ -9,4 +9,5 @@ type UserRepo interface {
 	FindUserByEmail(user models.UserLogin) (models.UserSigninResponse, error)
 	Changepassword(id int, passowrd string) error
 	GetPassword(id int) (string, error)
+	AddAdress(id int, adress models.AddAdress) error
 }

@@ -16,7 +16,7 @@ func ConnectDB(cfg config.Config) (*gorm.DB, error) {
 	if dberr != nil {
 		fmt.Println("couldn't connect db")
 	}
-	db.AutoMigrate(&domain.Admin{}, &domain.User{})
+	db.AutoMigrate(&domain.Admin{}, &domain.User{}, &domain.Adress{})
 	CheckAndCreateAdmin(db)
 	return db, dberr
 }

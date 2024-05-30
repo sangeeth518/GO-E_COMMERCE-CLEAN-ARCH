@@ -10,3 +10,10 @@ type AdminDetailResponse struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
+
+type UserdetailsAtAdmin struct {
+	Id      int    `json:"id"`
+	Email   string `json:"email"`
+	Phone   string `json:"phone"`
+	Blocked string `json:"blocked"`
+}

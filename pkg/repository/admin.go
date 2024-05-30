@@ -59,3 +59,20 @@ func (ad *Adminrepo) BlockUserById(user domain.User) error {
 	return nil
 
 }
+
+func (ad *Adminrepo) GetUsers(page int, count int) ([]models.UserdetailsAtAdmin, error) {
+
+	if page == 0 {
+		page = 1
+	}
+	offset := (page - 1) * count
+
+	var userdetails []models.UserdetailsAtAdmin
+
+	if err := ad.DB.Raw("select id , email, phone,blocked from users limit ? offset ?", count, offset).Scan(&userdetails).Error; err != nil {
+		return []models.UserdetailsAtAdmin{}, errors.New("err")
+	}
+	fmt.Printf("%d", offset)
+	return userdetails, nil
+
+}

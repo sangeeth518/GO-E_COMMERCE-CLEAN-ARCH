@@ -55,8 +55,16 @@ func (ur *userRepository) UserSignup(user models.UserDetails) (models.UserDetail
 
 }
 
+func (ur *userRepository) AddAdress(id int, adress models.AddAdress) error {
+	err := ur.DB.Exec("insert into adresses (user_id , name, house_name, street, city, state , phone , pin) values (?, ?, ?, ?, ?, ?, ?, ?)", id, adress.Name, adress.HouseName, adress.Street, adress.City, adress.State, adress.Phone, adress.Pin).Error
+	if err != nil {
+		return errors.New("could'nt add address")
+	}
+	return nil
+}
+
 func (ur *userRepository) Changepassword(id int, passowrd string) error {
-	err := ur.DB.Exec("update users set password = ? where id = ?", id, passowrd).Error
+	err := ur.DB.Exec("update users set password = ? where id = ?", passowrd, id).Error
 	if err != nil {
 
 		return err

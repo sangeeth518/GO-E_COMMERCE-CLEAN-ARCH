@@ -40,3 +40,13 @@ type Changepassword struct {
 	NewPassword        string `json:"new_password"`
 	ConfirmNewPassword string `json:"confirm_newpassword"`
 }
+
+type AddAdress struct {
+	Name      string `json:"name" validate:"required"`
+	HouseName string `json:"house_name" validate:"required"`
+	Street    string `json:"street" validate:"required"`
+	City      string `json:"city" validate:"required"`
+	State     string `json:"state" validate:"required"`
+	Phone     string `json:"phone" validate:"require"`
+	Pin       string `json:"pin" validate:"required"`
+}
