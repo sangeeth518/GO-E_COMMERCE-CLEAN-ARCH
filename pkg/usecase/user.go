@@ -111,7 +111,7 @@ func (uc *userUsecase) ChangePassword(id int, password string, newpass string, c
 		return errors.New("passwords does not match")
 	}
 
-	new_pass, err := uc.helper.PasswordHashing(password)
+	new_pass, err := uc.helper.PasswordHashing(newpass)
 	if err != nil {
 		return errors.New("error in password hashing")
 	}

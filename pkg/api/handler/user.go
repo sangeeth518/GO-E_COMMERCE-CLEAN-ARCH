@@ -69,6 +69,8 @@ func (uh *UserHandler) Login(c *gin.Context) {
 }
 
 func (uh *UserHandler) ChangePassword(c *gin.Context) {
+
+	// user_id, _ := c.Get("id")
 	idstring := c.Query("id")
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
