@@ -97,6 +97,14 @@ func (use *userUsecase) UserLogin(user models.UserLogin) (models.UserToken, erro
 	}, nil
 }
 
+func (u *userUsecase) AddAdress(id int, adress models.AddAdress) error {
+	err := u.userrepo.AddAdress(id, adress)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (uc *userUsecase) ChangePassword(id int, password string, newpass string, confrmpass string) error {
 	user_password, err := uc.userrepo.GetPassword(id)
 	if err != nil {

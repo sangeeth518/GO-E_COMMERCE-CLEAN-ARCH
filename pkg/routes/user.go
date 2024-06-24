@@ -10,5 +10,6 @@ func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler) {
 	engine.POST("/signup", userhandler.UserSignup)
 	engine.POST("/login", userhandler.Login)
 	engine.PUT("/changepass", middleware.UserAuth, userhandler.ChangePassword)
+	engine.POST("/adress", middleware.UserAuth, userhandler.AddAdress)
 
 }

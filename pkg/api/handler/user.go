@@ -68,6 +68,33 @@ func (uh *UserHandler) Login(c *gin.Context) {
 
 }
 
+func (uh *UserHandler) AddAdress(c *gin.Context) {
+	user_id, _ := c.Get("id")
+
+	var adress models.AddAdress
+	if err := c.BindJSON(&adress); err != nil {
+		errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errorRes)
+		return
+	}
+	err := validator.New().Struct(adress)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "constraints not in correct format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+
+	}
+	err = uh.userUsecase.AddAdress(user_id.(int), adress)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, " could not add adress in", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Adress added Succesfully", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
+
 func (uh *UserHandler) ChangePassword(c *gin.Context) {
 
 	// user_id, _ := c.Get("id")
