@@ -12,14 +12,14 @@ type ServerHttp struct {
 	engine *gin.Engine
 }
 
-func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.UserHandler) *ServerHttp {
+func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler) *ServerHttp {
 
 	// gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 
 	engine.Use(gin.Logger())
 
-	routes.AdminRoutes(engine.Group("/admin"), adminHandler)
+	routes.AdminRoutes(engine.Group("/admin"), adminHandler, categoryhandler)
 	routes.UserRoutes(engine.Group("/user"), userhandler)
 	return &ServerHttp{
 		engine: engine,

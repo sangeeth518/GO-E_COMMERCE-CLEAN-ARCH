@@ -1,7 +1,7 @@
 package domain
 
 type Category struct {
-	Id   int    `json:"id"`
+	Id   int    `json:"id" gorm:"unique;not null"`
 	Name string `json:"name"`
 }
 
