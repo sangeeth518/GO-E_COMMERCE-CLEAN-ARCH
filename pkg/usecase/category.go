@@ -26,3 +26,11 @@ func (cu *categoryUsecae) AddCategory(category domain.Category) (domain.Category
 	}
 	return categoryresponse, nil
 }
+
+func (cu *categoryUsecae) ShowCategories() ([]domain.Category, error) {
+	cat, err := cu.categoryrepo.ShowCategories()
+	if err != nil {
+		return []domain.Category{}, err
+	}
+	return cat, nil
+}

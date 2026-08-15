@@ -8,7 +8,6 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
-	"github.com/twilio/twilio-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,8 +20,6 @@ func NewHelper(config config.Config) interfaces.Helper {
 		config: config,
 	}
 }
-
-var client *twilio.RestClient
 
 type AuthCustomClaims struct {
 	ID    int    `json:"id"`

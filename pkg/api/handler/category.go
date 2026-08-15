@@ -36,3 +36,13 @@ func (ch *CategoryHandler) AddCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 
 }
+
+func (ch *CategoryHandler) ShowCategories(c *gin.Context) {
+	cat, err := ch.category.ShowCategories()
+	if err != nil {
+		errres := response.ClientResponse(http.StatusBadRequest, "cant fetch categories", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errres)
+	}
+	succesres := response.ClientResponse(http.StatusOK, "Categories fetched succesfully", cat, nil)
+	c.JSON(http.StatusOK, succesres)
+}

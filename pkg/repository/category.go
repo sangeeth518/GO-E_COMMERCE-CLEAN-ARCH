@@ -29,3 +29,12 @@ func (c *categoryRepo) AddCategory(category domain.Category) (domain.Category, e
 	}
 	return cat, nil
 }
+
+func (c *categoryRepo) ShowCategories() ([]domain.Category, error) {
+	var cat []domain.Category
+	if err := c.DB.Raw("select * from categories").Scan(&cat).Error; err != nil {
+		return []domain.Category{}, err
+	}
+	return cat, nil
+
+}

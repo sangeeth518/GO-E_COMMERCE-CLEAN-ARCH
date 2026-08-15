@@ -6,10 +6,11 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/api/middleware"
 )
 
-func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler) {
+func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler) {
 	engine.POST("/signup", userhandler.UserSignup)
 	engine.POST("/login", userhandler.Login)
 	engine.PUT("/changepass", middleware.UserAuth, userhandler.ChangePassword)
 	engine.POST("/adress", middleware.UserAuth, userhandler.AddAdress)
+	engine.GET("/showcategories", middleware.UserAuth, categoryhandler.ShowCategories)
 
 }
