@@ -34,3 +34,11 @@ func (cu *categoryUsecae) ShowCategories() ([]domain.Category, error) {
 	}
 	return cat, nil
 }
+
+func (cu *categoryUsecae) EditCategory(category domain.Category) error {
+	err := cu.categoryrepo.EditCategory(category)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -38,3 +38,11 @@ func (c *categoryRepo) ShowCategories() ([]domain.Category, error) {
 	return cat, nil
 
 }
+
+func (c *categoryRepo) EditCategory(category domain.Category) error {
+	if err := c.DB.Model(&category).Where("id=?", category.Id).Update("name", category.Name).Error; err != nil {
+		return err
+	}
+	return nil
+
+}

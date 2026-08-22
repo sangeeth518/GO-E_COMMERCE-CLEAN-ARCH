@@ -5,4 +5,5 @@ import "github.com/sangeeth518/go-Ecommerce/pkg/domain"
 type CateoryUsecase interface {
 	AddCategory(category domain.Category) (domain.Category, error)
 	ShowCategories() ([]domain.Category, error)
+	EditCategory(category domain.Category) error
 }

@@ -12,4 +12,5 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 	engine.GET("/unblock/:id", middleware.AdminAuthMiddleware, adminHandler.UnblockUser)
 	engine.GET("/getusers", middleware.AdminAuthMiddleware, adminHandler.Getusers)
 	engine.POST("/addcategory", middleware.AdminAuthMiddleware, categoryHandler.AddCategory)
+	engine.POST("/editcategory", middleware.AdminAuthMiddleware, categoryHandler.EditCategory)
 }

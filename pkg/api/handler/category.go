@@ -46,3 +46,23 @@ func (ch *CategoryHandler) ShowCategories(c *gin.Context) {
 	succesres := response.ClientResponse(http.StatusOK, "Categories fetched succesfully", cat, nil)
 	c.JSON(http.StatusOK, succesres)
 }
+
+// Edit catgegory(can only be done by admin)
+func (ch *CategoryHandler) EditCategory(c *gin.Context) {
+	var category domain.Category
+	err := c.BindJSON(&category)
+	if err != nil {
+		errres := response.ClientResponse(http.StatusBadRequest, "Data not in correct format", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errres)
+		return
+	}
+	err = ch.category.EditCategory(category)
+	if err != nil {
+		errres := response.ClientResponse(http.StatusBadRequest, "Cannot update category", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errres)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Category Updated succesfully", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
