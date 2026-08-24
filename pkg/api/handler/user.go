@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -97,14 +96,16 @@ func (uh *UserHandler) AddAdress(c *gin.Context) {
 
 func (uh *UserHandler) ChangePassword(c *gin.Context) {
 
-	// user_id, _ := c.Get("id")
-	idstring := c.Query("id")
-	id, err := strconv.Atoi(idstring)
-	if err != nil {
-		errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
-		c.JSON(http.StatusBadRequest, errorRes)
-		return
-	}
+	user_id, _ := c.Get("id")
+
+	id := user_id.(int)
+	// idstring := c.Query("id")
+	// id, err := strconv.Atoi(idstring)
+	// if err != nil {
+	// 	errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
+	// 	c.JSON(http.StatusBadRequest, errorRes)
+	// 	return
+	// }
 	var changepass models.Changepassword
 	if err := c.BindJSON(&changepass); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())

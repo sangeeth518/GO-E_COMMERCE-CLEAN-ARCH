@@ -40,9 +40,8 @@ func (ad *Adminrepo) GetUserById(id string) (domain.User, error) {
 	if count < 1 {
 		return domain.User{}, errors.New("user for the given id dosen't exist")
 	}
-	query := fmt.Sprintf("select * from users where id = %d", user_id)
 	var userdetails domain.User
-	if err := ad.DB.Raw(query).Scan(&userdetails).Error; err != nil {
+	if err := ad.DB.Raw("select * from users where id= ?", user_id).Scan(&userdetails).Error; err != nil {
 		return domain.User{}, err
 	}
 	return userdetails, nil

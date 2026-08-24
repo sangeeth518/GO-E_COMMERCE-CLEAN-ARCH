@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
@@ -15,7 +16,20 @@ func ConnectDB(cfg config.Config) (*gorm.DB, error) {
 	db, dberr := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{SkipDefaultTransaction: true})
 	if dberr != nil {
 		fmt.Println("couldn't connect db")
+		return nil, dberr
 	}
+
+	// Connection pooling
+	sqlDb, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDb.SetMaxIdleConns(10)
+	sqlDb.SetMaxOpenConns(25)
+	sqlDb.SetConnMaxLifetime(30 * time.Minute)
+	sqlDb.SetConnMaxIdleTime(15 * time.Minute)
+
 	db.AutoMigrate(&domain.Admin{}, &domain.User{}, &domain.Adress{}, &domain.Category{})
 	CheckAndCreateAdmin(db)
 	return db, dberr

@@ -8,11 +8,14 @@ type Config struct {
 	DBPort     string `mapstructure:"DB_PORT"`
 	DBUser     string `mapstructure:"DB_USER"`
 	DBPassword string `mapstructure:"DB_PASSWORD"`
-	JWTToken   string `mapstructure:"JWTTOKEN"`
+	// JWTToken   string `mapstructure:"JWTTOKEN"`
+	JWTToken     string `mapstructure:"JWTTOKEN"`      // admin access token secret
+	UserJWTToken string `mapstructure:"USER_JWTTOKEN"` // user access token secret
+	RefreshToken string `mapstructure:"REFRESH_TOKEN"` // refresh token secret
 }
 
 var envs = []string{
-	"DB_HOST", "DB_NAME", "DB_PORT", "DB_USER", "DB_PASSWORD", "JWTTOKEN",
+	"DB_HOST", "DB_NAME", "DB_PORT", "DB_USER", "DB_PASSWORD", "JWTTOKEN", "USER_JWTTOKEN", "REFRESH_TOKEN",
 }
 
 func LoadConfig() (Config, error) {

@@ -54,7 +54,7 @@ func (h *helper) GenerateTokenAdmin(admin models.AdminDetailResponse) (string, s
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
-	refreshTokenstrig, err := refreshToken.SignedString([]byte("refreshsecret"))
+	refreshTokenstrig, err := refreshToken.SignedString([]byte(h.config.RefreshToken))
 	if err != nil {
 		return "", "", err
 	}
@@ -73,7 +73,7 @@ func (h *helper) GenerateTokenClient(user models.UserDetailsResponse) (string, e
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims)
-	tokenstrig, err := token.SignedString([]byte("usersecret"))
+	tokenstrig, err := token.SignedString([]byte(h.config.UserJWTToken))
 	if err != nil {
 		return "", err
 	}

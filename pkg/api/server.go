@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	handler "github.com/sangeeth518/go-Ecommerce/pkg/api/handler"
+	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/routes"
 )
 
@@ -12,15 +13,15 @@ type ServerHttp struct {
 	engine *gin.Engine
 }
 
-func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler) *ServerHttp {
+func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler, cfg config.Config) *ServerHttp {
 
 	// gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 
 	engine.Use(gin.Logger())
 
-	routes.AdminRoutes(engine.Group("/admin"), adminHandler, categoryhandler)
-	routes.UserRoutes(engine.Group("/user"), userhandler, categoryhandler)
+	routes.AdminRoutes(engine.Group("/admin"), adminHandler, categoryhandler, cfg)
+	routes.UserRoutes(engine.Group("/user"), userhandler, categoryhandler, cfg)
 	return &ServerHttp{
 		engine: engine,
 	}
