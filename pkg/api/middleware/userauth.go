@@ -12,7 +12,6 @@ import (
 
 func UserAuth(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("in Middleware")
 		token := c.GetHeader("UserAuthorization")
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authorization token"})
@@ -40,7 +39,6 @@ func UserAuth(cfg config.Config) gin.HandlerFunc {
 			return
 
 		}
-		fmt.Println("claims", claims)
 		role, ok := claims["role"].(string)
 		if !ok || role != "user" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized access"})

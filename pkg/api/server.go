@@ -20,6 +20,8 @@ func NewServerHttp(adminHandler *handler.AdminHandler, userhandler *handler.User
 
 	engine.Use(gin.Logger())
 
+	engine.Use(gin.Recovery())
+
 	routes.AdminRoutes(engine.Group("/admin"), adminHandler, categoryhandler, cfg)
 	routes.UserRoutes(engine.Group("/user"), userhandler, categoryhandler, cfg)
 	return &ServerHttp{

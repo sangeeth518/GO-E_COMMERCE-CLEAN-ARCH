@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
@@ -71,7 +70,6 @@ func (ad *Adminrepo) GetUsers(page int, count int) ([]models.UserdetailsAtAdmin,
 	if err := ad.DB.Raw("select id , email, phone,blocked from users limit ? offset ?", count, offset).Scan(&userdetails).Error; err != nil {
 		return []models.UserdetailsAtAdmin{}, errors.New("err")
 	}
-	fmt.Printf("%d", offset)
 	return userdetails, nil
 
 }

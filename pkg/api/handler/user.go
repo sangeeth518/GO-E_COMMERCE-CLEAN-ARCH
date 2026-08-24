@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -56,7 +55,6 @@ func (uh *UserHandler) Login(c *gin.Context) {
 		return
 	}
 	user_details, err := uh.userUsecase.UserLogin(user)
-	fmt.Println(user_details.User.Name)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusBadRequest, "User could not be logged in", nil, err.Error())
 		c.JSON(http.StatusBadRequest, errRes)
@@ -96,16 +94,13 @@ func (uh *UserHandler) AddAdress(c *gin.Context) {
 
 func (uh *UserHandler) ChangePassword(c *gin.Context) {
 
-	user_id, _ := c.Get("id")
-
+	user_id, exist := c.Get("id")
+	if !exist {
+		errRes := response.ClientResponse(http.StatusUnauthorized, "Unauthorized", nil, "user not found")
+		c.JSON(http.StatusUnauthorized, errRes)
+		return
+	}
 	id := user_id.(int)
-	// idstring := c.Query("id")
-	// id, err := strconv.Atoi(idstring)
-	// if err != nil {
-	// 	errorRes := response.ClientResponse(http.StatusBadRequest, "check path parameter", nil, err.Error())
-	// 	c.JSON(http.StatusBadRequest, errorRes)
-	// 	return
-	// }
 	var changepass models.Changepassword
 	if err := c.BindJSON(&changepass); err != nil {
 		errorRes := response.ClientResponse(http.StatusBadRequest, "fields provided are in wrong format", nil, err.Error())
