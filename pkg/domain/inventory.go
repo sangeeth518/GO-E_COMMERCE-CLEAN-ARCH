@@ -5,10 +5,10 @@ type Category struct {
 	Name string `json:"name"`
 }
 
-type Inventories struct {
+type Inventory struct {
 	Id          int            `json:"id" gorm:"primaryKey" `
-	CategoryId  int            `json:"categroy_id"`
-	Category    Category       `json:"-" foreignKey:"CategoryId"`
+	CategoryId  int            `json:"category_id"`
+	Category    Category       `json:"-" gorm:"foreignKey:CategoryId"`
 	ProductName string         `json:"product_name"`
 	Description string         `json:"description"`
 	Size        string         `json:"size" gorm:"size:5;default:'M';check:size IN ('S', 'M', 'L', 'XL')"`

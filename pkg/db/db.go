@@ -30,7 +30,7 @@ func ConnectDB(cfg config.Config) (*gorm.DB, error) {
 	sqlDb.SetConnMaxLifetime(30 * time.Minute)
 	sqlDb.SetConnMaxIdleTime(15 * time.Minute)
 
-	db.AutoMigrate(&domain.Admin{}, &domain.User{}, &domain.Adress{}, &domain.Category{}, &domain.Inventories{}, &domain.ProductImage{})
+	db.AutoMigrate(&domain.Admin{}, &domain.User{}, &domain.Adress{}, &domain.Category{}, &domain.Inventory{}, &domain.ProductImage{})
 	CheckAndCreateAdmin(db)
 	return db, dberr
 }

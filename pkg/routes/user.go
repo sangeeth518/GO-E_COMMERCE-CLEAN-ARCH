@@ -7,11 +7,11 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 )
 
-func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler, cfg config.Config) {
+func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler, inventoryhandler *handler.InventoryHandler, cfg config.Config) {
 	engine.POST("/signup", userhandler.UserSignup)
 	engine.POST("/login", userhandler.Login)
 	engine.PUT("/changepass", middleware.UserAuth(cfg), userhandler.ChangePassword)
 	engine.POST("/adress", middleware.UserAuth(cfg), userhandler.AddAdress)
 	engine.GET("/showcategories", middleware.UserAuth(cfg), categoryhandler.ShowCategories)
-
+	engine.GET("/products", middleware.UserAuth(cfg), inventoryhandler.ListProducts)
 }
