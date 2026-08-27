@@ -18,6 +18,7 @@ func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
 	wire.Build(db.ConnectDB, helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler,
 		repository.NewUserRepository, usecase.NewUserUsecase, handler.NewUserHandler,
 		repository.NewCategoryRepository, usecase.NewCategoryUsecase, handler.NewCategoryHandler,
+		repository.NewInventoryRepository, usecase.NewInventoryUsecase, handler.NewInventoryHandler,
 
 		http.NewServerHttp)
 
