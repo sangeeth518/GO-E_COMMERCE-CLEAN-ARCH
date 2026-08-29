@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	"context"
 	"errors"
+	"mime/multipart"
 
 	helper_interface "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
@@ -47,4 +49,34 @@ func (i *inventoryUsecase) ListProducts(page, limit int) ([]models.Inventories, 
 		return nil, err
 	}
 	return productDetails, nil
+}
+
+//Add Product Images
+
+func (i *inventoryUsecase) AddProductImages(ctx context.Context, files []*multipart.FileHeader, productId int) ([]string, error) {
+
+	hasPrimary, err := i.invrepo.HasPrimaryImage(productId)
+	if err != nil {
+		return nil, errors.New("cannot check the existing images")
+	}
+
+	var uploadedURLS []string
+
+	for index, file := range files {
+		url, err := i.helper.AddProductImage(ctx, file, productId)
+		if err != nil {
+			return nil, errors.New("failed to upload image: " + err.Error())
+		}
+
+		isprimary := false
+		if !hasPrimary && index == 0 {
+			isprimary = true
+		}
+		err = i.invrepo.AddProductImage(productId, url, isprimary)
+		if err != nil {
+			return nil, errors.New("Failed to upload image")
+		}
+		uploadedURLS = append(uploadedURLS, url)
+	}
+	return uploadedURLS, nil
 }

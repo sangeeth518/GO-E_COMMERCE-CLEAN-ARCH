@@ -31,8 +31,7 @@ func (i *inventoryRepo) ListProducts(page, limit int) ([]models.Inventories, err
 	var inventories []models.Inventories
 	offset := (page - 1) * limit
 	query := `
-		SELECT 
-			inventories.id,
+		SELECT 	inventories.id,
 			inventories.category_id,
 			categories.name AS category,
 			inventories.product_name,
@@ -51,3 +50,19 @@ func (i *inventoryRepo) ListProducts(page, limit int) ([]models.Inventories, err
 	return inventories, nil
 }
 
+func (i *inventoryRepo) AddProductImage(productId int, imageUrl string, isPrimary bool) error {
+	err := i.DB.Exec("insert into product_images (product_id,image_url,is_primary) values(?,?,?)", productId, imageUrl, isPrimary).Error
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (i *inventoryRepo) HasPrimaryImage(productId int) (bool, error) {
+	var count int
+	if err := i.DB.Raw("select count(*) from product_images where product_id =? and is_primary=true", productId).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

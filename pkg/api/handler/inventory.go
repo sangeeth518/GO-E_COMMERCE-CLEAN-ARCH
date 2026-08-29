@@ -82,3 +82,35 @@ func (i *InventoryHandler) ListProducts(c *gin.Context) {
 	successRes := response.ClientResponse(http.StatusOK, "successfully retrieved all products", products, nil)
 	c.JSON(http.StatusOK, successRes)
 }
+
+func (i *InventoryHandler) AddProductImages(c *gin.Context) {
+	productIdStr := c.Param("id")
+	productId, err := strconv.Atoi(productIdStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "wrong format of product id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	form, err := c.MultipartForm()
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "failed to parse mutlipartform", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+	files := form.File["images"]
+	if len(files) == 0 {
+		errRes := response.ClientResponse(http.StatusBadRequest, "At least one image is required", nil, nil)
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	urls, err := i.inv.AddProductImages(c.Request.Context(), files, productId)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "Failed to upload images", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+	successRes := response.ClientResponse(http.StatusOK, "Images uploaded successfully", gin.H{"image_urls": urls}, nil)
+	c.JSON(http.StatusOK, successRes)
+
+}
