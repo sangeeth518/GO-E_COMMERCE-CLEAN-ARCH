@@ -1,9 +1,13 @@
 package helper
 
 import (
+	"context"
 	"errors"
 	"time"
 
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang-jwt/jwt"
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
@@ -13,12 +17,18 @@ import (
 
 type helper struct {
 	config config.Config
+	s3     *s3.Client
 }
 
-func NewHelper(config config.Config) interfaces.Helper {
+func NewHelper(config config.Config) (interfaces.Helper, error) {
+	s3Client, err := InitS3Client(config)
+	if err != nil {
+		return nil, err
+	}
 	return &helper{
 		config: config,
-	}
+		s3:     s3Client,
+	}, nil
 }
 
 type AuthCustomClaims struct {
@@ -96,4 +106,18 @@ func (h *helper) CompareHashPassword(password string, givenpass string) error {
 		return err
 	}
 	return nil
+}
+
+// Initializing S3 client
+
+func InitS3Client(config config.Config) (*s3.Client, error) {
+	awscfg, err := awsConfig.LoadDefaultConfig(context.TODO(),
+		awsConfig.WithRegion(config.AWSRegion),
+		awsConfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(config.AWSKey, config.AWSSecret, "")),
+	)
+	if err != nil {
+		return nil, err
+	}
+	client := s3.NewFromConfig(awscfg)
+	return client, nil
 }

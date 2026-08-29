@@ -12,10 +12,15 @@ type Config struct {
 	JWTToken     string `mapstructure:"JWTTOKEN"`      // admin access token secret
 	UserJWTToken string `mapstructure:"USER_JWTTOKEN"` // user access token secret
 	RefreshToken string `mapstructure:"REFRESH_TOKEN"` // refresh token secret
+	AWSRegion    string `mapstructure:"AWS_REGION"`
+	AWSKey       string `mapstructure:"AWS_ACCESS_KEY_ID"`
+	AWSSecret    string `mapstructure:"AWS_SECRET_ACCESS_KEY"`
+	BucketName   string `mapstructure:"AWS_BUCKET_NAME"`
 }
 
 var envs = []string{
 	"DB_HOST", "DB_NAME", "DB_PORT", "DB_USER", "DB_PASSWORD", "JWTTOKEN", "USER_JWTTOKEN", "REFRESH_TOKEN",
+	"AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_BUCKET_NAME",
 }
 
 func LoadConfig() (Config, error) {
