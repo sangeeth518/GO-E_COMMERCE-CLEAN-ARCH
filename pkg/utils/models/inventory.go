@@ -29,3 +29,21 @@ type Inventories struct {
 	Price       float64 `json:"price"`
 }
 
+// response for single product with images
+type ProductWithImages struct {
+	Id          int                    `json:"id"`
+	CategoryId  int                    `json:"category_id"`
+	Category    string                 `json:"category"`
+	ProductName string                 `json:"product_name"`
+	Description string                 `json:"description"`
+	Size        string                 `json:"size"`
+	Stock       int                    `json:"stock"`
+	Price       float64                `json:"price"`
+	Images      []ProductImageResponse `json:"images"`
+}
+
+type ProductImageResponse struct {
+	Id        int    `json:"id"`
+	ImageUrl  string `json:"image_url"`
+	IsPrimary bool   `json:"is_primary"`
+}

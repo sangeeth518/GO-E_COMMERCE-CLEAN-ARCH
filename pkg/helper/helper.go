@@ -3,8 +3,12 @@ package helper
 import (
 	"context"
 	"errors"
+	"fmt"
+	"mime/multipart"
+	"path/filepath"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -120,4 +124,30 @@ func InitS3Client(config config.Config) (*s3.Client, error) {
 	}
 	client := s3.NewFromConfig(awscfg)
 	return client, nil
+}
+
+//ADD PRODUCT IMAGE
+
+func (h *helper) AddProductImage(ctx context.Context, file *multipart.FileHeader, productId int) (string, error) {
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	ext := filepath.Ext(file.Filename)
+
+	filename := fmt.Sprintf("products/%d%d%s", productId, time.Now().UnixNano(), ext)
+
+	_, err = h.s3.PutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(h.config.BucketName),
+		Key:    aws.String(filename),
+		Body:   src,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return filename, nil
+
 }

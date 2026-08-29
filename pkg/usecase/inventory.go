@@ -21,6 +21,12 @@ func NewInventoryUsecase(invrepo interfaces.InventoryRepo, helper helper_interfa
 }
 
 func (i *inventoryUsecase) AddProduct(product models.AddProduct) (models.ProductResponse, error) {
+	if product.Price <= 0 {
+		return models.ProductResponse{}, errors.New("price must be greater than zero")
+	}
+	if product.Stock < 0 {
+		return models.ProductResponse{}, errors.New("stock cannot be negative")
+	}
 	productresponse, err := i.invrepo.AddProduct(product)
 	if err != nil {
 		return models.ProductResponse{}, errors.New("failed to add in Db")
@@ -42,4 +48,3 @@ func (i *inventoryUsecase) ListProducts(page, limit int) ([]models.Inventories, 
 	}
 	return productDetails, nil
 }
-
