@@ -7,7 +7,7 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 )
 
-func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler, inventoryhandler *handler.InventoryHandler, cfg config.Config) {
+func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categoryhandler *handler.CategoryHandler, inventoryhandler *handler.InventoryHandler, carthandler *handler.CartHandler, cfg config.Config) {
 	engine.POST("/signup", userhandler.UserSignup)
 	engine.POST("/login", userhandler.Login)
 	engine.PUT("/changepass", middleware.UserAuth(cfg), userhandler.ChangePassword)
@@ -15,5 +15,11 @@ func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categ
 	engine.GET("/showcategories", middleware.UserAuth(cfg), categoryhandler.ShowCategories)
 	engine.GET("/products", middleware.UserAuth(cfg), inventoryhandler.ListProducts)
 	engine.GET("/product/:id", middleware.UserAuth(cfg), inventoryhandler.GetProductByID)
+
+	// Cart routes
+	engine.POST("/cart", middleware.UserAuth(cfg), carthandler.AddToCart)
+	engine.GET("/cart", middleware.UserAuth(cfg), carthandler.ViewCart)
+	engine.PUT("/cart", middleware.UserAuth(cfg), carthandler.UpdateQuantity)
+	engine.DELETE("/cart/:id", middleware.UserAuth(cfg), carthandler.RemoveProductFromCart)
 }
 
