@@ -14,4 +14,6 @@ func UserRoutes(engine *gin.RouterGroup, userhandler *handler.UserHandler, categ
 	engine.POST("/adress", middleware.UserAuth(cfg), userhandler.AddAdress)
 	engine.GET("/showcategories", middleware.UserAuth(cfg), categoryhandler.ShowCategories)
 	engine.GET("/products", middleware.UserAuth(cfg), inventoryhandler.ListProducts)
+	engine.GET("/product/:id", middleware.UserAuth(cfg), inventoryhandler.GetProductByID)
 }
+

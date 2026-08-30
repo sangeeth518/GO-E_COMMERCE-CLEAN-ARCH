@@ -16,5 +16,9 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 	engine.POST("/editcategory", middleware.AdminAuthMiddleware(cfg), categoryHandler.EditCategory)
 	engine.POST("/addproduct/:category_id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.AddProduct)
 	engine.GET("/products", middleware.AdminAuthMiddleware(cfg), inventoryHandler.ListProducts)
+	engine.GET("/product/:id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.GetProductByID)
 	engine.POST("/product/:id/images", middleware.AdminAuthMiddleware(cfg), inventoryHandler.AddProductImages)
+	engine.DELETE("/product/image/:image_id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.DeleteProductImage)
+	engine.DELETE("/product/:id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.DeleteProduct)
 }
+

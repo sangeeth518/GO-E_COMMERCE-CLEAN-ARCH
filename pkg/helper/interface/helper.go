@@ -13,4 +13,8 @@ type Helper interface {
 	PasswordHashing(password string) (string, error)
 	CompareHashPassword(password string, givenpass string) error
 	AddProductImage(ctx context.Context, file *multipart.FileHeader, productId int) (string, error)
+	GetPresignedURL(ctx context.Context, key string) (string, error)
+	DeleteProductImageFromS3(ctx context.Context, key string) error
 }
+
+

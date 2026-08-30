@@ -2,7 +2,9 @@ package handler
 
 import (
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -104,6 +106,32 @@ func (i *InventoryHandler) AddProductImages(c *gin.Context) {
 		return
 	}
 
+	// Allowed image extensions and max size (5 MB per image)
+	allowedExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".webp": true,
+	}
+	const maxFileSize = 5 * 1024 * 1024 // 5 MB
+
+	for _, file := range files {
+		// 1. Check file size
+		if file.Size > maxFileSize {
+			errRes := response.ClientResponse(http.StatusBadRequest, "File size exceeds limit of 5MB: "+file.Filename, nil, nil)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+
+		// 2. Check file extension
+		ext := strings.ToLower(filepath.Ext(file.Filename))
+		if !allowedExtensions[ext] {
+			errRes := response.ClientResponse(http.StatusBadRequest, "Invalid file format for "+file.Filename+". Only .jpg, .jpeg, .png, .webp are allowed", nil, nil)
+			c.JSON(http.StatusBadRequest, errRes)
+			return
+		}
+	}
+
 	urls, err := i.inv.AddProductImages(c.Request.Context(), files, productId)
 	if err != nil {
 		errRes := response.ClientResponse(http.StatusInternalServerError, "Failed to upload images", nil, err.Error())
@@ -114,3 +142,62 @@ func (i *InventoryHandler) AddProductImages(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 
 }
+
+func (i *InventoryHandler) GetProductByID(c *gin.Context) {
+	productIdStr := c.Param("id")
+	productId, err := strconv.Atoi(productIdStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "wrong format of product id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	product, err := i.inv.GetProductByID(c.Request.Context(), productId)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "failed to get product", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "successfully retrieved product details", product, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *InventoryHandler) DeleteProductImage(c *gin.Context) {
+	imageIdStr := c.Param("image_id")
+	imageId, err := strconv.Atoi(imageIdStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "wrong format of image id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	if err := i.inv.DeleteProductImage(c.Request.Context(), imageId); err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "failed to delete image", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "image deleted successfully from s3 and database", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
+func (i *InventoryHandler) DeleteProduct(c *gin.Context) {
+	productIdStr := c.Param("id")
+	productId, err := strconv.Atoi(productIdStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "wrong format of product id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	if err := i.inv.DeleteProduct(c.Request.Context(), productId); err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "failed to delete product", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "product and its images deleted successfully", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+

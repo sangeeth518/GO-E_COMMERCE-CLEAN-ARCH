@@ -151,12 +151,40 @@ func (h *helper) AddProductImage(ctx context.Context, file *multipart.FileHeader
 		return "", err
 	}
 
-	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s",
-		h.config.BucketName,
-		h.config.AWSRegion,
-		filename,
-	)
-
-	return url, nil
-
+	// Return the S3 key
+	return filename, nil
 }
+
+// GET PRESIGNED URL FOR IMAGE
+
+func (h *helper) GetPresignedURL(ctx context.Context, key string) (string, error) {
+	presignClient := s3.NewPresignClient(h.s3)
+	presignedReq, err := presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(h.config.BucketName),
+		Key:    aws.String(key),
+	}, s3.WithPresignExpires(time.Hour*1))
+	if err != nil {
+		return "", err
+	}
+	return presignedReq.URL, nil
+}
+
+// DELETE PRODUCT IMAGE FROM S3
+
+func (h *helper) DeleteProductImageFromS3(ctx context.Context, key string) error {
+	if key == "" {
+		return errors.New("invalid s3 object key")
+	}
+
+	_, err := h.s3.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(h.config.BucketName),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+

@@ -66,3 +66,76 @@ func (i *inventoryRepo) HasPrimaryImage(productId int) (bool, error) {
 	}
 	return count > 0, nil
 }
+
+func (i *inventoryRepo) CheckProductExists(productId int) (bool, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM inventories WHERE id = ?`
+	if err := i.DB.Raw(query, productId).Scan(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (i *inventoryRepo) GetProductByID(productId int) (models.Inventories, error) {
+	var product models.Inventories
+	query := `
+		SELECT 	inventories.id,
+			inventories.category_id,
+			categories.name AS category,
+			inventories.product_name,
+			inventories.description,
+			inventories.size,
+			inventories.stock,
+			inventories.price
+		FROM inventories
+		LEFT JOIN categories ON inventories.category_id = categories.id
+		WHERE inventories.id = ?
+	`
+	if err := i.DB.Raw(query, productId).Scan(&product).Error; err != nil {
+		return models.Inventories{}, err
+	}
+	return product, nil
+}
+
+func (i *inventoryRepo) GetProductImages(productId int) ([]models.ProductImageResponse, error) {
+	var images []models.ProductImageResponse
+	query := `SELECT id, image_url, is_primary FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, id ASC`
+	if err := i.DB.Raw(query, productId).Scan(&images).Error; err != nil {
+		return nil, err
+	}
+	return images, nil
+}
+
+func (i *inventoryRepo) GetImageURLByID(imageId int) (string, error) {
+	var imageURL string
+	query := `SELECT image_url FROM product_images WHERE id = ?`
+	if err := i.DB.Raw(query, imageId).Scan(&imageURL).Error; err != nil {
+		return "", err
+	}
+	return imageURL, nil
+}
+
+func (i *inventoryRepo) DeleteProductImageByID(imageId int) error {
+	query := `DELETE FROM product_images WHERE id = ?`
+	return i.DB.Exec(query, imageId).Error
+}
+
+func (i *inventoryRepo) GetImageURLsByProductID(productId int) ([]string, error) {
+	var urls []string
+	query := `SELECT image_url FROM product_images WHERE product_id = ?`
+	if err := i.DB.Raw(query, productId).Scan(&urls).Error; err != nil {
+		return nil, err
+	}
+	return urls, nil
+}
+
+func (i *inventoryRepo) DeleteAllProductImages(productId int) error {
+	query := `DELETE FROM product_images WHERE product_id = ?`
+	return i.DB.Exec(query, productId).Error
+}
+
+func (i *inventoryRepo) DeleteProduct(productId int) error {
+	query := `DELETE FROM inventories WHERE id = ?`
+	return i.DB.Exec(query, productId).Error
+}
+
