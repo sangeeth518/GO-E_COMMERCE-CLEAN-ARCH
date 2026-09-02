@@ -85,8 +85,14 @@ func (c *CartRepository) GetProductStockAndPrice(inventoryID int) (int, float64,
 	err := c.DB.Model(&domain.Inventory{}).
 		Select("stock, price").
 		Where("id = ?", inventoryID).
-		Scan(&result).Error
-	return result.Stock, result.Price, err
+		First(&result).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, 0, errors.New("product does not exist")
+		}
+		return 0, 0, err
+	}
+	return result.Stock, result.Price, nil
 }
 
 func (c *CartRepository) UpdateCartTotal(cartID int, total float64) error {
