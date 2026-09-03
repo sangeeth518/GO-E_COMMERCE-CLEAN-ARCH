@@ -18,6 +18,7 @@ func AdminRoutes(engine *gin.RouterGroup, adminHandler *handler.AdminHandler, ca
 	engine.GET("/products", middleware.AdminAuthMiddleware(cfg), inventoryHandler.ListProducts)
 	engine.GET("/product/:id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.GetProductByID)
 	engine.POST("/product/:id/images", middleware.AdminAuthMiddleware(cfg), inventoryHandler.AddProductImages)
+	engine.PATCH("/product/image/:image_id/primary", middleware.AdminAuthMiddleware(cfg), inventoryHandler.SetPrimaryImage)
 	engine.DELETE("/product/image/:image_id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.DeleteProductImage)
 	engine.DELETE("/product/:id", middleware.AdminAuthMiddleware(cfg), inventoryHandler.DeleteProduct)
 }

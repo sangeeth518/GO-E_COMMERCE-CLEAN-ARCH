@@ -47,3 +47,11 @@ type ProductImageResponse struct {
 	ImageUrl  string `json:"image_url"`
 	IsPrimary bool   `json:"is_primary"`
 }
+
+type ImageUploadResult struct {
+	Index        int    `json:"index"`
+	Filename     string `json:"filename"`
+	Success      bool   `json:"success"`
+	PresignedURL string `json:"presigned_url,omitempty"`
+	Error        string `json:"error,omitempty"`
+}

@@ -10,15 +10,16 @@ type OrderIncoming struct {
 
 // OrderResponse represents summary of an order
 type OrderResponse struct {
-	Id            int       `json:"id"`
-	UserId        int       `json:"user_id"`
-	AddressId     int       `json:"address_id"`
-	PaymentMethod string    `json:"payment_method"`
-	PaymentStatus string    `json:"payment_status"`
-	OrderStatus   string    `json:"order_status"`
-	FinalPrice    float64   `json:"final_price"`
-	Discount      float64   `json:"discount"`
-	CreatedAt     time.Time `json:"created_at"`
+	Id              int       `json:"id"`
+	UserId          int       `json:"user_id"`
+	AddressId       int       `json:"address_id"`
+	PaymentMethod   string    `json:"payment_method"`
+	PaymentStatus   string    `json:"payment_status"`
+	OrderStatus     string    `json:"order_status"`
+	FinalPrice      float64   `json:"final_price"`
+	Discount        float64   `json:"discount"`
+	RazorpayOrderId string    `json:"razorpay_order_id,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 // OrderItemResponse represents individual product line-item in an order
@@ -49,7 +50,13 @@ type AddressResponse struct {
 	Pin       string `json:"pin"`
 }
 
-// CancelOrder represents request to cancel an order
-type CancelOrder struct {
-	OrderId int `json:"order_id" validate:"required"`
+// summary of order — used in list view
+type MyOrdersResponse struct {
+	Id            int       `json:"id"`
+	FinalPrice    float64   `json:"final_price"`
+	PaymentMethod string    `json:"payment_method"`
+	PaymentStatus string    `json:"payment_status"`
+	OrderStatus   string    `json:"order_status"`
+	CreatedAt     time.Time `json:"created_at"`
+	ItemCount     int       `json:"item_count"`
 }

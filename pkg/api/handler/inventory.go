@@ -182,6 +182,25 @@ func (i *InventoryHandler) DeleteProductImage(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+func (i *InventoryHandler) SetPrimaryImage(c *gin.Context) {
+	imageIdStr := c.Param("image_id")
+	imageId, err := strconv.Atoi(imageIdStr)
+	if err != nil {
+		errRes := response.ClientResponse(http.StatusBadRequest, "wrong format of image id", nil, err.Error())
+		c.JSON(http.StatusBadRequest, errRes)
+		return
+	}
+
+	if err := i.inv.SetPrimaryImage(c.Request.Context(), imageId); err != nil {
+		errRes := response.ClientResponse(http.StatusInternalServerError, "failed to set image as primary", nil, err.Error())
+		c.JSON(http.StatusInternalServerError, errRes)
+		return
+	}
+
+	successRes := response.ClientResponse(http.StatusOK, "image set as primary successfully", nil, nil)
+	c.JSON(http.StatusOK, successRes)
+}
+
 func (i *InventoryHandler) DeleteProduct(c *gin.Context) {
 	productIdStr := c.Param("id")
 	productId, err := strconv.Atoi(productIdStr)

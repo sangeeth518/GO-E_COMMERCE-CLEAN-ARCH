@@ -1,6 +1,9 @@
 package interfaces
 
-import "github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
+import (
+	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
+	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
+)
 
 type InventoryRepo interface {
 	AddProduct(product models.AddProduct) (models.ProductResponse, error)
@@ -11,6 +14,9 @@ type InventoryRepo interface {
 	GetProductByID(productId int) (models.Inventories, error)
 	GetProductImages(productId int) ([]models.ProductImageResponse, error)
 	GetImageURLByID(imageId int) (string, error)
+	GetImageByID(imageId int) (domain.ProductImage, error)
+	SetFirstImageAsPrimary(productId int) error
+	SetImageAsPrimary(productId, imageId int) error
 	DeleteProductImageByID(imageId int) error
 	GetImageURLsByProductID(productId int) ([]string, error)
 	DeleteAllProductImages(productId int) error

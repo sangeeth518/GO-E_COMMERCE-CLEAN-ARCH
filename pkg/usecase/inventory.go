@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
+	"sync"
 
 	helper_interface "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
@@ -53,7 +54,7 @@ func (i *inventoryUsecase) ListProducts(page, limit int) ([]models.Inventories, 
 
 //Add Product Images
 
-func (i *inventoryUsecase) AddProductImages(ctx context.Context, files []*multipart.FileHeader, productId int) ([]string, error) {
+func (i *inventoryUsecase) AddProductImages(ctx context.Context, files []*multipart.FileHeader, productId int) ([]models.ImageUploadResult, error) {
 	exists, err := i.invrepo.CheckProductExists(productId)
 	if err != nil {
 		return nil, err
@@ -67,35 +68,51 @@ func (i *inventoryUsecase) AddProductImages(ctx context.Context, files []*multip
 		return nil, errors.New("cannot check the existing images")
 	}
 
-	var uploadedURLS []string
+	results := make([]models.ImageUploadResult, len(files))
+	var wg sync.WaitGroup
 
-	for index, file := range files {
-		// 1. Upload to S3 and get the S3 key
-		key, err := i.helper.AddProductImage(ctx, file, productId)
-		if err != nil {
-			return nil, errors.New("failed to upload image: " + err.Error())
-		}
+	for idx, f := range files {
+		index, file := idx, f
+		wg.Add(1)
 
-		isprimary := false
-		if !hasPrimary && index == 0 {
-			isprimary = true
-		}
+		go func() {
+			defer wg.Done()
+			results[index] = models.ImageUploadResult{
+				Index:    index,
+				Filename: file.Filename,
+			}
+			// 1. Upload to S3 and get the S3 key
+			key, err := i.helper.AddProductImage(ctx, file, productId)
+			if err != nil {
+				results[index].Error = "upload failed " + err.Error()
+				return
+			}
 
-		// 2. Save S3 key in database
-		err = i.invrepo.AddProductImage(productId, key, isprimary)
-		if err != nil {
-			return nil, errors.New("failed to save image key in database")
-		}
+			isprimary := false
+			if !hasPrimary && index == 0 {
+				isprimary = true
+			}
 
-		// 3. Generate presigned URL for response
-		presignedURL, err := i.helper.GetPresignedURL(ctx, key)
-		if err != nil {
-			uploadedURLS = append(uploadedURLS, key)
-		} else {
-			uploadedURLS = append(uploadedURLS, presignedURL)
-		}
+			// 2. Save S3 key in database
+			err = i.invrepo.AddProductImage(productId, key, isprimary)
+			if err != nil {
+				results[index].Error = "failed to save image key in database" + err.Error()
+				return
+			}
+
+			// 3. Generate presigned URL for response
+			presignedURL, err := i.helper.GetPresignedURL(ctx, key)
+			if err != nil {
+				results[index].Error = "Upload success but failed to generate preview URL"
+				return
+			}
+			results[index].PresignedURL = presignedURL
+			results[index].Success = true
+		}()
 	}
-	return uploadedURLS, nil
+
+	wg.Wait()
+	return results, nil
 }
 
 func (i *inventoryUsecase) GetProductByID(ctx context.Context, productId int) (models.ProductWithImages, error) {
@@ -139,22 +156,37 @@ func (i *inventoryUsecase) GetProductByID(ctx context.Context, productId int) (m
 }
 
 func (i *inventoryUsecase) DeleteProductImage(ctx context.Context, imageId int) error {
-	key, err := i.invrepo.GetImageURLByID(imageId)
+	image, err := i.invrepo.GetImageByID(imageId)
 	if err != nil {
 		return errors.New("image not found in database")
 	}
-	if key == "" {
-		return errors.New("image not found")
-	}
 
 	// Delete from S3 using key directly
-	if err := i.helper.DeleteProductImageFromS3(ctx, key); err != nil {
+	if err := i.helper.DeleteProductImageFromS3(ctx, image.ImageUrl); err != nil {
 		return errors.New("failed to delete image from S3: " + err.Error())
 	}
 
 	// Delete from DB
 	if err := i.invrepo.DeleteProductImageByID(imageId); err != nil {
 		return errors.New("failed to delete image from database")
+	}
+
+	// If the deleted image was the primary image, promote the next remaining image to primary
+	if image.IsPrimary {
+		_ = i.invrepo.SetFirstImageAsPrimary(image.ProductID)
+	}
+
+	return nil
+}
+
+func (i *inventoryUsecase) SetPrimaryImage(ctx context.Context, imageId int) error {
+	image, err := i.invrepo.GetImageByID(imageId)
+	if err != nil {
+		return errors.New("image not found in database")
+	}
+
+	if err := i.invrepo.SetImageAsPrimary(image.ProductID, imageId); err != nil {
+		return errors.New("failed to set image as primary")
 	}
 
 	return nil
@@ -189,5 +221,3 @@ func (i *inventoryUsecase) DeleteProduct(ctx context.Context, productId int) err
 
 	return nil
 }
-
-

@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"errors"
+
 	"gorm.io/gorm"
 
+	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
 )
@@ -113,6 +116,30 @@ func (i *inventoryRepo) GetImageURLByID(imageId int) (string, error) {
 		return "", err
 	}
 	return imageURL, nil
+}
+
+func (i *inventoryRepo) GetImageByID(imageId int) (domain.ProductImage, error) {
+	var image domain.ProductImage
+	query := `SELECT id, product_id, image_url, is_primary FROM product_images WHERE id = ?`
+	if err := i.DB.Raw(query, imageId).Scan(&image).Error; err != nil {
+		return domain.ProductImage{}, err
+	}
+	if image.ID == 0 {
+		return domain.ProductImage{}, errors.New("image not found")
+	}
+	return image, nil
+}
+
+func (i *inventoryRepo) SetFirstImageAsPrimary(productId int) error {
+	query := `UPDATE product_images SET is_primary = true WHERE id = (SELECT id FROM product_images WHERE product_id = ? ORDER BY id ASC LIMIT 1)`
+	return i.DB.Exec(query, productId).Error
+}
+
+func (i *inventoryRepo) SetImageAsPrimary(productId, imageId int) error {
+	if err := i.DB.Exec(`UPDATE product_images SET is_primary = false WHERE product_id = ?`, productId).Error; err != nil {
+		return err
+	}
+	return i.DB.Exec(`UPDATE product_images SET is_primary = true WHERE id = ? AND product_id = ?`, imageId, productId).Error
 }
 
 func (i *inventoryRepo) DeleteProductImageByID(imageId int) error {
