@@ -60,3 +60,10 @@ type MyOrdersResponse struct {
 	CreatedAt     time.Time `json:"created_at"`
 	ItemCount     int       `json:"item_count"`
 }
+
+// PaymentVerification represents Razorpay payment confirmation payload from client
+type PaymentVerification struct {
+	RazorpayOrderId   string `json:"razorpay_order_id" validate:"required"`
+	RazorpayPaymentId string `json:"razorpay_payment_id" validate:"required"`
+	RazorpaySignature string `json:"razorpay_signature" validate:"required"`
+}
