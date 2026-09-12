@@ -263,3 +263,45 @@ func (o *orderRepo) GetOrderDetails(orderID, userID int) (models.OrderDetailsRes
 		OrderItems: items,
 	}, nil
 }
+
+// CancelOrder cancels an active order and adds the ordered quantities back to inventory stock
+func (o *orderRepo) CancelOrder(orderID, userID int) error {
+	return o.DB.Transaction(func(tx *gorm.DB) error {
+		var order domain.Order
+		if err := tx.Where("id = ? AND user_id = ?", orderID, userID).First(&order).Error; err != nil {
+			return errors.New("order not found")
+		}
+
+		if order.OrderStatus == "cancelled" {
+			return errors.New("order is already cancelled")
+		}
+		if order.OrderStatus == "delivered" {
+			return errors.New("cannot cancel an order that has already been delivered")
+		}
+
+		// Fetch items for this order to restock
+		var items []domain.OrderItem
+		if err := tx.Where("order_id = ?", order.Id).Find(&items).Error; err != nil {
+			return err
+		}
+
+		// Restock each inventory item (stock = stock + quantity)
+		for _, item := range items {
+			if err := tx.Model(&domain.Inventory{}).
+				Where("id = ?", item.InventoryId).
+				Update("stock", gorm.Expr("stock + ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+
+		// Update order status to cancelled
+		if err := tx.Model(&domain.Order{}).Where("id = ?", order.Id).Updates(map[string]interface{}{
+			"order_status":   "cancelled",
+			"payment_status": "cancelled",
+		}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

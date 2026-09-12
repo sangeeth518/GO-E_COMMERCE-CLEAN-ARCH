@@ -16,11 +16,14 @@ type Config struct {
 	AWSKey       string `mapstructure:"AWS_ACCESS_KEY_ID"`
 	AWSSecret    string `mapstructure:"AWS_SECRET_ACCESS_KEY"`
 	BucketName   string `mapstructure:"AWS_BUCKET_NAME"`
+	RedisHost    string `mapstructure:"REDIS_HOST"`
+	RedisPort    string `mapstructure:"REDIS_PORT"`
 }
 
 var envs = []string{
 	"DB_HOST", "DB_NAME", "DB_PORT", "DB_USER", "DB_PASSWORD", "JWTTOKEN", "USER_JWTTOKEN", "REFRESH_TOKEN",
 	"AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_BUCKET_NAME",
+	"REDIS_HOST", "REDIS_PORT",
 }
 
 func LoadConfig() (Config, error) {

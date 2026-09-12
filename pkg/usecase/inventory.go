@@ -3,9 +3,12 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"sync"
+	"time"
 
+	"github.com/sangeeth518/go-Ecommerce/pkg/db"
 	helper_interface "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
 	services "github.com/sangeeth518/go-Ecommerce/pkg/usecase/interface"
@@ -15,12 +18,15 @@ import (
 type inventoryUsecase struct {
 	invrepo interfaces.InventoryRepo
 	helper  helper_interface.Helper
+	cache   *db.RedisCache
 }
 
-func NewInventoryUsecase(invrepo interfaces.InventoryRepo, helper helper_interface.Helper) services.InventoryUsecase {
+func NewInventoryUsecase(invrepo interfaces.InventoryRepo, helper helper_interface.Helper, cache *db.RedisCache) services.InventoryUsecase {
 	return &inventoryUsecase{
 		invrepo: invrepo,
-		helper:  helper}
+		helper:  helper,
+		cache:   cache,
+	}
 }
 
 func (i *inventoryUsecase) AddProduct(product models.AddProduct) (models.ProductResponse, error) {
@@ -34,6 +40,10 @@ func (i *inventoryUsecase) AddProduct(product models.AddProduct) (models.Product
 	if err != nil {
 		return models.ProductResponse{}, errors.New("failed to add in Db")
 	}
+
+	// Invalidate product list cache since a new product was added
+	_ = i.cache.DeleteByPattern(context.Background(), "products:*")
+
 	return productresponse, nil
 
 }
@@ -45,10 +55,26 @@ func (i *inventoryUsecase) ListProducts(page, limit int) ([]models.Inventories, 
 	if limit <= 0 {
 		limit = 10
 	}
+
+	// 1. Try to get from Redis cache first
+	cacheKey := fmt.Sprintf("products:page:%d:limit:%d", page, limit)
+	var cachedProducts []models.Inventories
+
+	found, err := i.cache.Get(context.Background(), cacheKey, &cachedProducts)
+	if err == nil && found {
+		// Cache HIT — return directly without touching PostgreSQL
+		return cachedProducts, nil
+	}
+
+	// 2. Cache MISS — query PostgreSQL
 	productDetails, err := i.invrepo.ListProducts(page, limit)
 	if err != nil {
 		return nil, err
 	}
+
+	// 3. Store the result in Redis with a 10-minute TTL
+	_ = i.cache.Set(context.Background(), cacheKey, productDetails, 10*time.Minute)
+
 	return productDetails, nil
 }
 
@@ -218,6 +244,9 @@ func (i *inventoryUsecase) DeleteProduct(ctx context.Context, productId int) err
 	if err := i.invrepo.DeleteProduct(productId); err != nil {
 		return errors.New("failed to delete product from database")
 	}
+
+	// Invalidate product list cache since a product was deleted
+	_ = i.cache.DeleteByPattern(context.Background(), "products:*")
 
 	return nil
 }

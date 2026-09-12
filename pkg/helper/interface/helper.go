@@ -15,6 +15,7 @@ type Helper interface {
 	AddProductImage(ctx context.Context, file *multipart.FileHeader, productId int) (string, error)
 	GetPresignedURL(ctx context.Context, key string) (string, error)
 	DeleteProductImageFromS3(ctx context.Context, key string) error
+	GenerateInvoicePDF(details models.OrderDetailsResponse) ([]byte, error)
 }
 
 

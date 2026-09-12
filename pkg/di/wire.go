@@ -15,13 +15,16 @@ import (
 )
 
 func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
-	wire.Build(db.ConnectDB, helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler,
+	wire.Build(db.ConnectDB, db.ConnectRedis, db.NewRedisCache,
+		helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler,
 		repository.NewUserRepository, usecase.NewUserUsecase, handler.NewUserHandler,
 		repository.NewCategoryRepository, usecase.NewCategoryUsecase, handler.NewCategoryHandler,
 		repository.NewInventoryRepository, usecase.NewInventoryUsecase, handler.NewInventoryHandler,
 		repository.NewCartRepository, usecase.NewCartUsecase, handler.NewCartHandler,
+		repository.NewOrderRepo, usecase.NewOrderUsecase, handler.NewOrderHandler,
 
 		http.NewServerHttp)
 
 	return &http.ServerHttp{}, nil
 }
+

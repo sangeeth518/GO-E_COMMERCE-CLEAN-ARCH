@@ -22,4 +22,7 @@ type OrderRepo interface {
 	// Order details & history
 	GetOrdersByUserID(userID int) ([]models.MyOrdersResponse, error)
 	GetOrderDetails(orderID, userID int) (models.OrderDetailsResponse, error)
+
+	// Order cancellation
+	CancelOrder(orderID, userID int) error
 }

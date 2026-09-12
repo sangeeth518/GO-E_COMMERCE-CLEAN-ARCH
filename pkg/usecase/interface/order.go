@@ -7,4 +7,6 @@ type OrderUsecase interface {
 	VerifyPayment(payment models.PaymentVerification) error
 	GetMyOrders(userID int) ([]models.MyOrdersResponse, error)
 	GetOrderDetails(orderID, userID int) (models.OrderDetailsResponse, error)
+	CancelOrder(orderID, userID int) error
+	PrintInvoice(orderID, userID int) ([]byte, error)
 }

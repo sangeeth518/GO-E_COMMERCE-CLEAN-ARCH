@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
@@ -187,4 +189,100 @@ func (h *helper) DeleteProductImageFromS3(ctx context.Context, key string) error
 	return nil
 }
 
+// GenerateInvoicePDF creates a professional PDF invoice from order details
+func (h *helper) GenerateInvoicePDF(details models.OrderDetailsResponse) ([]byte, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetMargins(15, 15, 15)
+	pdf.AddPage()
 
+	// Title
+	pdf.SetFont("Arial", "B", 20)
+	pdf.CellFormat(100, 10, "GO E-COMMERCE", "", 0, "L", false, 0, "")
+	pdf.SetFont("Arial", "B", 14)
+	pdf.CellFormat(80, 10, "TAX INVOICE", "", 1, "R", false, 0, "")
+
+	pdf.Ln(4)
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(15, pdf.GetY(), 195, pdf.GetY())
+	pdf.Ln(6)
+
+	// Order Info & Shipping Address
+	yBefore := pdf.GetY()
+
+	// Left: Shipping Address
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(90, 6, "Billed To:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(90, 5, details.Address.Name, "", 1, "L", false, 0, "")
+	pdf.CellFormat(90, 5, fmt.Sprintf("%s, %s", details.Address.HouseName, details.Address.Street), "", 1, "L", false, 0, "")
+	pdf.CellFormat(90, 5, fmt.Sprintf("%s, %s - %s", details.Address.City, details.Address.State, details.Address.Pin), "", 1, "L", false, 0, "")
+	pdf.CellFormat(90, 5, fmt.Sprintf("Phone: %s", details.Address.Phone), "", 1, "L", false, 0, "")
+
+	yLeft := pdf.GetY()
+
+	// Right: Order Metadata
+	pdf.SetXY(110, yBefore)
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(85, 6, "Order Information:", "", 1, "L", false, 0, "")
+	pdf.SetFont("Arial", "", 10)
+	pdf.SetX(110)
+	pdf.CellFormat(85, 5, fmt.Sprintf("Invoice / Order ID: #%d", details.Order.Id), "", 1, "L", false, 0, "")
+	pdf.SetX(110)
+	pdf.CellFormat(85, 5, fmt.Sprintf("Date: %s", details.Order.CreatedAt.Format("02 Jan 2006 15:04")), "", 1, "L", false, 0, "")
+	pdf.SetX(110)
+	pdf.CellFormat(85, 5, fmt.Sprintf("Payment Method: %s", details.Order.PaymentMethod), "", 1, "L", false, 0, "")
+	pdf.SetX(110)
+	pdf.CellFormat(85, 5, fmt.Sprintf("Payment Status: %s", details.Order.PaymentStatus), "", 1, "L", false, 0, "")
+	pdf.SetX(110)
+	pdf.CellFormat(85, 5, fmt.Sprintf("Order Status: %s", details.Order.OrderStatus), "", 1, "L", false, 0, "")
+
+	yRight := pdf.GetY()
+
+	// Move below the taller column
+	if yLeft > yRight {
+		pdf.SetY(yLeft + 8)
+	} else {
+		pdf.SetY(yRight + 8)
+	}
+
+	// Table Headers
+	pdf.SetFillColor(240, 240, 240)
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(10, 8, "#", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(75, 8, "Product Name", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(20, 8, "Size", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(20, 8, "Qty", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(25, 8, "Unit Price", "1", 0, "R", true, 0, "")
+	pdf.CellFormat(30, 8, "Total Price", "1", 1, "R", true, 0, "")
+
+	// Table Rows
+	pdf.SetFont("Arial", "", 9)
+	for i, item := range details.OrderItems {
+		pdf.CellFormat(10, 7, fmt.Sprintf("%d", i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(75, 7, item.ProductName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(20, 7, item.Size, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(20, 7, fmt.Sprintf("%d", item.Quantity), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(25, 7, fmt.Sprintf("%.2f", item.UnitPrice), "1", 0, "R", false, 0, "")
+		pdf.CellFormat(30, 7, fmt.Sprintf("%.2f", item.TotalPrice), "1", 1, "R", false, 0, "")
+	}
+
+	// Total Price Summary
+	pdf.Ln(2)
+	pdf.SetFont("Arial", "B", 11)
+	pdf.CellFormat(150, 8, "Final Amount:", "", 0, "R", false, 0, "")
+	pdf.CellFormat(30, 8, fmt.Sprintf("Rs. %.2f", details.Order.FinalPrice), "1", 1, "R", true, 0, "")
+
+	// Footer
+	pdf.Ln(15)
+	pdf.SetFont("Arial", "I", 9)
+	pdf.SetTextColor(120, 120, 120)
+	pdf.CellFormat(180, 5, "Thank you for shopping with Go-Ecommerce! This is a computer-generated invoice.", "", 1, "C", false, 0, "")
+
+	var buf bytes.Buffer
+	err := pdf.Output(&buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
