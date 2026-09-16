@@ -1,0 +1,9 @@
+name: BuyItNow CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+ 
