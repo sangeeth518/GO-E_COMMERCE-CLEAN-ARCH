@@ -12,6 +12,7 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/db"
 	"github.com/sangeeth518/go-Ecommerce/pkg/helper"
+	"github.com/sangeeth518/go-Ecommerce/pkg/publisher"
 	"github.com/sangeeth518/go-Ecommerce/pkg/repository"
 	"github.com/sangeeth518/go-Ecommerce/pkg/usecase"
 )
@@ -23,11 +24,6 @@ func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
 	if err != nil {
 		return nil, err
 	}
-	redisClient, err := db.ConnectRedis(cfg)
-	if err != nil {
-		return nil, err
-	}
-	redisCache := db.NewRedisCache(redisClient)
 	adminRepo := repository.NewAdminRepository(gormDB)
 	interfacesHelper, err := helper.NewHelper(cfg)
 	if err != nil {
@@ -42,13 +38,22 @@ func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
 	cateoryUsecase := usecase.NewCategoryUsecase(categoryRepo, interfacesHelper)
 	categoryHandler := handler.NewCategoryHandler(cateoryUsecase)
 	inventoryRepo := repository.NewInventoryRepository(gormDB)
+	client, err := db.ConnectRedis(cfg)
+	if err != nil {
+		return nil, err
+	}
+	redisCache := db.NewRedisCache(client)
 	inventoryUsecase := usecase.NewInventoryUsecase(inventoryRepo, interfacesHelper, redisCache)
 	inventoryHandler := handler.NewInventoryHandler(inventoryUsecase)
 	cartRepository := repository.NewCartRepository(gormDB)
 	cartUsecase := usecase.NewCartUsecase(cartRepository)
 	cartHandler := handler.NewCartHandler(cartUsecase)
 	orderRepo := repository.NewOrderRepo(gormDB)
-	orderUsecase := usecase.NewOrderUsecase(orderRepo, interfacesHelper)
+	publisherPublisher, err := publisher.NewPublisher(cfg)
+	if err != nil {
+		return nil, err
+	}
+	orderUsecase := usecase.NewOrderUsecase(orderRepo, interfacesHelper, publisherPublisher)
 	orderHandler := handler.NewOrderHandler(orderUsecase)
 	serverHttp := http.NewServerHttp(adminHandler, userHandler, categoryHandler, inventoryHandler, cartHandler, orderHandler, cfg)
 	return serverHttp, nil

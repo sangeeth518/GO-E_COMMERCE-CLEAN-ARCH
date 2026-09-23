@@ -305,3 +305,13 @@ func (o *orderRepo) CancelOrder(orderID, userID int) error {
 		return nil
 	})
 }
+
+func (o *orderRepo) GetUserDetails(userID int) (models.UserDetailsResponse, error) {
+	var user models.UserDetailsResponse
+	query := `SELECT id, name, email, phone FROM users WHERE id = ?`
+	err := o.DB.Raw(query, userID).Scan(&user).Error
+	if err != nil {
+		return models.UserDetailsResponse{}, err
+	}
+	return user, nil
+}

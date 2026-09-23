@@ -2,10 +2,13 @@ package usecase
 
 import (
 	"errors"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/sangeeth518/go-Ecommerce/pkg/domain"
 	interfaces "github.com/sangeeth518/go-Ecommerce/pkg/helper/interface"
+	"github.com/sangeeth518/go-Ecommerce/pkg/publisher"
 	interfacee "github.com/sangeeth518/go-Ecommerce/pkg/repository/interface"
 	services "github.com/sangeeth518/go-Ecommerce/pkg/usecase/interface"
 	"github.com/sangeeth518/go-Ecommerce/pkg/utils/models"
@@ -14,12 +17,14 @@ import (
 type orderUsecase struct {
 	orderrepo interfacee.OrderRepo
 	helper    interfaces.Helper
+	publisher publisher.Publisher
 }
 
-func NewOrderUsecase(orderrepo interfacee.OrderRepo, helper interfaces.Helper) services.OrderUsecase {
+func NewOrderUsecase(orderrepo interfacee.OrderRepo, helper interfaces.Helper, publisher publisher.Publisher) services.OrderUsecase {
 	return &orderUsecase{
 		orderrepo: orderrepo,
 		helper:    helper,
+		publisher: publisher,
 	}
 }
 
@@ -75,6 +80,35 @@ func (o *orderUsecase) OrderCheckout(userID int, input models.OrderIncoming) (mo
 	if err != nil {
 		return models.OrderResponse{}, err
 	}
+
+	go func() {
+		if o.publisher == nil {
+			log.Println(" publisher is nil")
+			return
+		}
+
+		user, err := o.orderrepo.GetUserDetails(placeOrder.UserId)
+		if err != nil {
+			log.Printf("failed to get user details: %v", err)
+			return
+		}
+		log.Printf(" user details found: %s", user.Email)
+		event := models.OrderPlacedEvent{
+			EventType:   "order.placed",
+			OrderId:     placeOrder.Id,
+			UserId:      placeOrder.UserId,
+			UserEmail:   user.Email,
+			UserPhone:   user.Phone,
+			UserName:    user.Name,
+			TotalAmount: placeOrder.FinalPrice,
+			CreatedAt:   time.Now(),
+		}
+		log.Printf(" publishing order event: %+v", event)
+		if err := o.publisher.PublishOrderPlaced(event); err != nil {
+			log.Printf(" failed to publish order event %v", err)
+		}
+		log.Println(" order event published successfully")
+	}()
 
 	return models.OrderResponse{
 		Id:            placeOrder.Id,

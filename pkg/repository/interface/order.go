@@ -25,4 +25,6 @@ type OrderRepo interface {
 
 	// Order cancellation
 	CancelOrder(orderID, userID int) error
+
+	GetUserDetails(userID int) (models.UserDetailsResponse, error)
 }

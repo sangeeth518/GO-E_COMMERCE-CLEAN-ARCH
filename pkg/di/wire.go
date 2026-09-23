@@ -10,12 +10,13 @@ import (
 	"github.com/sangeeth518/go-Ecommerce/pkg/config"
 	"github.com/sangeeth518/go-Ecommerce/pkg/db"
 	"github.com/sangeeth518/go-Ecommerce/pkg/helper"
+	publisher "github.com/sangeeth518/go-Ecommerce/pkg/publisher"
 	"github.com/sangeeth518/go-Ecommerce/pkg/repository"
 	"github.com/sangeeth518/go-Ecommerce/pkg/usecase"
 )
 
 func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
-	wire.Build(db.ConnectDB, db.ConnectRedis, db.NewRedisCache,
+	wire.Build(db.ConnectDB, db.ConnectRedis, db.NewRedisCache, publisher.NewPublisher,
 		helper.NewHelper, repository.NewAdminRepository, usecase.NewAdminUsecase, handler.NewAdminHandler,
 		repository.NewUserRepository, usecase.NewUserUsecase, handler.NewUserHandler,
 		repository.NewCategoryRepository, usecase.NewCategoryUsecase, handler.NewCategoryHandler,
@@ -27,4 +28,3 @@ func InitializeAPI(cfg config.Config) (*http.ServerHttp, error) {
 
 	return &http.ServerHttp{}, nil
 }
-
