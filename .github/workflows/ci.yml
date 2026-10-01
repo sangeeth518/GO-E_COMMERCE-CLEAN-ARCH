@@ -62,7 +62,7 @@ jobs:
   
   docker:
     name: Build and  Push Docker Images
-    needs: [ecommmerce, notification]
+    needs: [ecommerce, notification]
     runs-on: ubuntu-latest
 
     steps:
