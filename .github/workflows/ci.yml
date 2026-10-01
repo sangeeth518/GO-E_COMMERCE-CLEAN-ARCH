@@ -79,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME}}/buyitnow:latest
 
@@ -87,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./notification-service
-          dockerfile: notification-service/Dockerfile
+          file: notification-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME}}/buyitnow-notification:latest
 
