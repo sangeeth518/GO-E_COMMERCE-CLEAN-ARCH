@@ -92,14 +92,31 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME}}/buyitnow-notification:latest
 
 
-      
+  deploy:
+    name: Deploy to EC2
+    needs: docker
+    runs-on: ubuntu-latest
 
-  
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with: 
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/buyitnow
+
+            docker pull ${{ secrets.DOCKER_USERNAME }}/buyitnow:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/buyitnow-notification:latest
+
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }} docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate buyitnow notification
+
+            docker image prune -f
+
+            echo "✅ Deployment complete"
+
+            
 
 
-
-  
-
-      
-
- 
+         
