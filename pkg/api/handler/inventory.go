@@ -220,3 +220,6 @@ func (i *InventoryHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, successRes)
 }
 
+func (i *InventoryHandler) Hi(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"hi": "hello from buy it now"})
+}
